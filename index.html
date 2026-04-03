@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DETOX FOREST">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="핸드폰을 내려놓고 숲을 키워요. 디지털 절제 리워드 앱">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>DETOX FOREST</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;min-height:100vh;color:#e8f5e8}
+.app{max-width:420px;margin:0 auto;padding:0 0 80px}
+
+/* 온보딩 */
+#onboarding{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)}
+.ob-logo{font-size:40px;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:4px}.ob-logo span{color:#a8edbc}
+.ob-sub{font-size:15px;color:#7ecfa0;margin-bottom:40px;letter-spacing:1px}
+.ob-card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(12px);border-radius:24px;padding:28px 24px;width:100%;max-width:340px;margin-bottom:16px}
+.ob-card h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.ob-card p{font-size:14px;color:#a8c5b8;margin-bottom:20px;line-height:1.7}
+.ob-input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(168,237,188,0.4);border-radius:14px;color:#fff;font-size:16px;margin-bottom:12px;outline:none;letter-spacing:2px;text-align:center;text-transform:uppercase}
+.ob-input::placeholder{color:rgba(168,237,188,0.4);letter-spacing:0;text-transform:none}
+.ob-input:focus{border-color:rgba(168,237,188,0.8);background:rgba(255,255,255,0.12)}
+.ob-btn{width:100%;padding:16px;border-radius:14px;border:none;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:8px}
+.ob-btn-primary{background:linear-gradient(135deg,#6bcf8f,#3da86a);color:#fff}.ob-btn-primary:active{transform:scale(0.97)}
+.ob-btn-secondary{background:rgba(255,255,255,0.08);color:#a8edbc;border:1px solid rgba(168,237,188,0.35)}.ob-btn-secondary:active{transform:scale(0.97)}
+.ob-err{font-size:13px;color:#ff8a80;margin-top:8px;min-height:18px}
+
+/* 헤더 */
+.header{padding:20px 20px 14px;background:#16213e;display:flex;align-items:center;justify-content:space-between}
+.logo-wrap{text-align:center;flex:1}
+.logo{font-size:11px;letter-spacing:5px;color:#a8edbc;font-weight:600}
+.logo-main{font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px}.logo-main span{color:#a8edbc}
+.family-code{background:rgba(168,237,188,0.1);border:1px solid rgba(168,237,188,0.25);border-radius:10px;padding:6px 10px;text-align:center;cursor:pointer}
+.family-code-lbl{font-size:9px;color:#7ecfa0;letter-spacing:2px}
+.family-code-val{font-size:14px;font-weight:700;color:#a8edbc;letter-spacing:2px}
+
+.nav{display:flex;background:#0f1b33;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:10}
+.nav button{flex:1;padding:13px 0;border:none;background:none;font-size:13px;color:#5a7a9a;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:0.5px}
+.nav button.active{color:#a8edbc;border-bottom-color:#a8edbc;font-weight:600}
+.tab{display:none;padding:16px}.tab.active{display:block}
+
+/* 홈 */
+.hero-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.15);border-radius:20px;padding:24px 20px;margin-bottom:12px;text-align:center}
+.amount-label{font-size:13px;letter-spacing:3px;color:#7ecfa0;text-transform:uppercase;margin-bottom:8px}
+.big-amount{font-size:58px;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1}
+.big-amount span{font-size:24px;color:#a8edbc;font-weight:600}
+.rate-now{display:inline-flex;align-items:center;gap:6px;background:rgba(168,237,188,0.08);border:1px solid rgba(168,237,188,0.2);border-radius:10px;padding:6px 14px;font-size:13px;color:#a8edbc;font-weight:600;margin:8px 0}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;margin:10px 0;letter-spacing:0.5px}
+.status-pill.idle{background:rgba(255,255,255,0.06);color:#5a7a9a;border:1px solid rgba(255,255,255,0.1)}
+.status-pill.running{background:rgba(107,207,143,0.15);color:#a8edbc;border:1px solid rgba(107,207,143,0.3)}
+.status-pill.paused{background:rgba(255,213,79,0.12);color:#ffd54f;border:1px solid rgba(255,213,79,0.3)}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot.green{background:#6bcf8f;animation:pulse 1.2s infinite}
+.dot.yellow{background:#ffd54f}
+.dot.gray{background:#5a7a9a}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
+.timer-row{display:flex;justify-content:center;gap:6px;margin:10px 0}
+.timer-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:8px 14px;text-align:center;min-width:64px}
+.timer-num{font-size:28px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.timer-lbl{font-size:12px;color:#7ecfa0;margin-top:2px;letter-spacing:1px}
+.ctrl-area{display:flex;gap:10px;margin-top:14px;justify-content:center}
+.btn-main{flex:1;max-width:180px;padding:16px;border-radius:14px;border:none;font-size:17px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-start{background:linear-gradient(135deg,#6bcf8f,#3da86a);color:#fff}.btn-start:active{transform:scale(0.97)}
+.btn-pause{background:rgba(255,213,79,0.12);color:#ffd54f;border:1px solid rgba(255,213,79,0.3)}.btn-pause:active{transform:scale(0.97)}
+.btn-resume{background:rgba(107,207,143,0.12);color:#a8edbc;border:1px solid rgba(107,207,143,0.3)}.btn-resume:active{transform:scale(0.97)}
+.btn-stop{background:rgba(255,107,107,0.1);color:#ff8a80;border:1px solid rgba(255,107,107,0.25)}.btn-stop:active{transform:scale(0.97)}
+
+/* 시간대 요금표 카드 */
+.rate-table-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:16px;padding:16px;margin-bottom:12px}
+.rate-table-title{font-size:12px;letter-spacing:2px;color:#7ecfa0;text-transform:uppercase;margin-bottom:10px}
+.rate-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;margin-bottom:6px;transition:background .3s}
+.rate-row.active-slot{background:rgba(107,207,143,0.15);border:1px solid rgba(107,207,143,0.3)}
+.rate-row:not(.active-slot){background:rgba(255,255,255,0.04)}
+.rate-time{font-size:14px;color:#a8c5b8;font-weight:500}
+.rate-badge{font-size:14px;font-weight:700;color:#a8edbc}
+.rate-badge.zero{color:#5a7a9a}
+.rate-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.progress-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.progress-info{display:flex;justify-content:space-between;font-size:14px;color:#7ecfa0;margin-bottom:8px}
+.progress-bar{height:7px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#3da86a,#a8edbc);border-radius:4px;transition:width .5s}
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.mini-box{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:14px;padding:14px;text-align:center}
+.mini-num{font-size:22px;font-weight:700;color:#fff}
+.mini-lbl{font-size:13px;color:#7ecfa0;margin-top:3px}
+.share-btn{width:100%;padding:14px;background:rgba(168,237,188,0.08);border:1px solid rgba(168,237,188,0.25);border-radius:14px;color:#a8edbc;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.share-btn:active{transform:scale(0.98)}
+
+/* 숲 */
+.section-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:16px;padding:18px;margin-bottom:12px}
+.sec-title{font-size:12px;letter-spacing:3px;color:#7ecfa0;text-transform:uppercase;margin-bottom:4px}
+.sec-head{font-size:19px;font-weight:700;color:#fff;margin-bottom:14px}
+.forest-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.tree-slot{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);position:relative}
+.tree-slot.growing{border-color:rgba(107,207,143,0.5);background:rgba(107,207,143,0.07)}
+.tree-slot.done{border-color:#6bcf8f;background:rgba(107,207,143,0.12)}
+.tree-slot .slbl{font-size:8px;color:#5a7a9a;position:absolute;bottom:3px}
+.tree-slot.done .slbl{color:#a8edbc}
+.current-tree-wrap{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;text-align:center}
+.ct-emoji{font-size:60px;line-height:1;margin:4px 0 8px}
+.ct-stage{font-size:13px;letter-spacing:2px;color:#a8edbc;text-transform:uppercase;margin-bottom:4px}
+.ct-prog{font-size:16px;color:#fff;font-weight:600}
+
+/* 통계 */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:12px;padding:14px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;color:#a8edbc}
+.stat-desc{font-size:13px;color:#7ecfa0;margin-top:3px}
+.bar-chart{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:12px;padding:14px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-day{font-size:13px;color:#7ecfa0;width:22px;flex-shrink:0}
+.bar-track{flex:1;height:18px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#3da86a,#a8edbc);border-radius:3px;transition:width .6s}
+.bar-amt{font-size:13px;color:#a8edbc;font-weight:600;width:44px;text-align:right;flex-shrink:0}
+.parent-header{background:rgba(168,237,188,0.06);border:1px solid rgba(168,237,188,0.18);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.parent-avatar{width:48px;height:48px;border-radius:50%;background:rgba(107,207,143,0.15);border:2px solid rgba(168,237,188,0.4);display:flex;align-items:center;justify-content:center;font-size:22px}
+.parent-info h3{font-size:17px;font-weight:700;color:#fff}
+.parent-info p{font-size:13px;color:#7ecfa0}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(107,207,143,0.12);border:1px solid rgba(107,207,143,0.3);border-radius:20px;padding:4px 10px;font-size:12px;color:#a8edbc;font-weight:600}
+
+/* 미래 */
+.proj-row{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;margin-bottom:8px}
+.proj-icon{font-size:26px;width:38px;text-align:center}
+.proj-period{font-size:13px;color:#7ecfa0;letter-spacing:1px}
+.proj-value{font-size:18px;font-weight:700;color:#fff;margin:2px 0}
+.proj-sub{font-size:13px;color:#a8edbc}
+
+/* 설정 (공통) */
+.setting-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.12);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.setting-row:last-child{border-bottom:none}
+.setting-name{font-size:15px;color:#d0e8f0}
+.setting-val{font-size:14px;color:#a8edbc;font-weight:600}
+.toggle{width:44px;height:24px;border-radius:12px;background:rgba(255,255,255,0.1);position:relative;cursor:pointer;transition:background .2s;border:1px solid rgba(255,255,255,0.15)}
+.toggle.on{background:rgba(107,207,143,0.4);border-color:rgba(107,207,143,0.5)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#7a9ab0;transition:transform .2s}
+.toggle.on::after{transform:translateX(20px);background:#a8edbc}
+.info-notice{background:rgba(168,237,188,0.06);border:1px solid rgba(168,237,188,0.15);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.info-notice p{font-size:14px;color:#7ecfa0;line-height:1.7}
+.info-notice strong{color:#a8edbc}
+
+/* 부모 요금 설정 UI */
+.rate-edit-card{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(255,213,79,0.2);border-radius:16px;padding:18px;margin-bottom:12px}
+.rate-edit-title{font-size:12px;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;margin-bottom:4px}
+.rate-edit-head{font-size:17px;font-weight:700;color:#fff;margin-bottom:14px}
+.rate-edit-row{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:10px}
+.rate-edit-label{font-size:12px;color:#7ecfa0;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.rate-edit-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.field-wrap{display:flex;flex-direction:column;gap:4px}
+.field-lbl{font-size:11px;color:#5a7a9a;letter-spacing:1px}
+.field-input{width:100%;padding:10px 10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:15px;font-weight:600;text-align:center;outline:none}
+.field-input:focus{border-color:rgba(168,237,188,0.5);background:rgba(255,255,255,0.1)}
+.field-unit{font-size:11px;color:#5a7a9a;text-align:center;margin-top:2px}
+.save-rate-btn{width:100%;padding:16px;background:linear-gradient(135deg,#ffd54f,#ffb300);color:#1a1a2e;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;margin-top:4px;letter-spacing:0.5px;transition:all .15s}
+.save-rate-btn:active{transform:scale(0.97)}
+.rate-saved-note{font-size:13px;color:#7ecfa0;text-align:center;margin-top:8px;min-height:18px}
+
+/* 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:linear-gradient(145deg,#1e2d4a,#162340);border:1px solid rgba(168,237,188,0.2);border-radius:24px;padding:28px 24px;text-align:center;width:320px;max-width:90vw}
+.modal h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.modal p{font-size:14px;color:#7ecfa0;line-height:1.6;margin-bottom:16px}
+.modal-earned{font-size:36px;font-weight:800;color:#a8edbc;margin:12px 0}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.modal-btns button{flex:1;padding:16px;border-radius:12px;border:none;font-size:15px;font-weight:700;cursor:pointer}
+.modal-cancel{background:rgba(168,237,188,0.1);color:#a8edbc;border:1px solid rgba(168,237,188,0.25)}
+.modal-confirm{background:linear-gradient(135deg,#ff6b6b,#e53935);color:#fff}
+
+.sync-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(30,45,74,0.95);border:1px solid rgba(168,237,188,0.35);border-radius:20px;padding:10px 20px;font-size:14px;color:#a8edbc;font-weight:600;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.sync-toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- 온보딩 -->
+<div id="onboarding">
+  <div class="ob-logo">DETOX<span>FOREST</span></div>
+  <div class="ob-sub">핸드폰을 내려놓고 · 숲을 키워라</div>
+  <div class="ob-card">
+    <h3>🌱 자녀 모드</h3>
+    <p>처음 시작하면 가족 코드가 생성돼요.<br>부모님과 공유하면 실시간으로 볼 수 있어요!</p>
+    <input class="ob-input" id="child-name" placeholder="이름을 입력하세요 (예: 민준)" maxlength="6">
+    <button class="ob-btn ob-btn-primary" onclick="startChildMode()">자녀로 시작하기</button>
+  </div>
+  <div class="ob-card">
+    <h3>👨‍👩‍👧 부모 모드</h3>
+    <p>자녀의 가족 코드를 입력하면<br>통계 확인 및 요금 설정을 할 수 있어요.</p>
+    <input class="ob-input" id="parent-code-input" placeholder="가족 코드 입력 (예: MIN123)" maxlength="8">
+    <button class="ob-btn ob-btn-secondary" onclick="startParentMode()">부모로 연결하기</button>
+    <div class="ob-err" id="ob-err"></div>
+  </div>
+</div>
+
+<!-- 메인 앱 -->
+<div id="mainapp" style="display:none">
+  <div class="header">
+    <div style="width:70px"></div>
+    <div class="logo-wrap">
+      <div class="logo">DETOX FOREST</div>
+      <div class="logo-main">DETOX<span>FOREST</span></div>
+    </div>
+    <div class="family-code" onclick="copyCode()">
+      <div class="family-code-lbl">CODE</div>
+      <div class="family-code-val" id="header-code-val">——</div>
+    </div>
+  </div>
+
+  <div class="nav" id="main-nav">
+    <button class="active" onclick="showTab('home')">HOME</button>
+    <button onclick="showTab('forest')">FOREST</button>
+    <button onclick="showTab('stats')">STATS</button>
+    <button onclick="showTab('future')">FUTURE</button>
+    <button onclick="showTab('settings')">SET</button>
+  </div>
+
+  <!-- 홈 -->
+  <div id="tab-home" class="tab active">
+    <div class="hero-card">
+      <div class="amount-label">total earned</div>
+      <div class="big-amount" id="total-amount">0<span>원</span></div>
+      <div class="rate-now" id="rate-now">현재 시간대: 분당 0원</div>
+      <div class="status-pill idle" id="status-pill">
+        <div class="dot gray" id="dot"></div>
+        <span id="status-text">대기 중</span>
+      </div>
+      <div class="timer-row">
+        <div class="timer-box"><div class="timer-num" id="t-h">00</div><div class="timer-lbl">HOUR</div></div>
+        <div class="timer-box"><div class="timer-num" id="t-m">00</div><div class="timer-lbl">MIN</div></div>
+        <div class="timer-box"><div class="timer-num" id="t-s">00</div><div class="timer-lbl">SEC</div></div>
+      </div>
+      <div class="ctrl-area" id="ctrl-area"></div>
+    </div>
+
+    <!-- 시간대 요금표 -->
+    <div class="rate-table-card">
+      <div class="rate-table-title">⏰ 시간대별 적립 요금</div>
+      <div id="rate-table-body"></div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-info"><span>다음 나무까지</span><span id="tree-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="tree-bar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <span style="font-size:14px;color:#7ecfa0" id="next-tree-txt">0 / 10,000원</span>
+        <span style="font-size:16px" id="ct-emoji-small">🌱</span>
+      </div>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-box"><div class="mini-num" id="today-time">0분</div><div class="mini-lbl">오늘 절제 시간</div></div>
+      <div class="mini-box"><div class="mini-num" id="today-earned">0원</div><div class="mini-lbl">오늘 적립</div></div>
+    </div>
+    <button class="share-btn" onclick="shareReport()">📤 카카오톡으로 오늘 리포트 공유</button>
+  </div>
+
+  <!-- 숲 -->
+  <div id="tab-forest" class="tab">
+    <div class="section-card">
+      <div class="sec-title">my forest</div>
+      <div class="sec-head" id="forest-head">첫 나무를 키워보세요 🌱</div>
+      <div class="forest-grid" id="forest-grid"></div>
+    </div>
+    <div class="section-card">
+      <div class="sec-title">growing now</div>
+      <div class="current-tree-wrap">
+        <div class="ct-emoji" id="ct-emoji">🌱</div>
+        <div class="ct-stage" id="ct-stage">SEED STAGE</div>
+        <div class="ct-prog" id="ct-prog">0 / 10,000원</div>
+        <div style="margin-top:12px"><div class="progress-bar"><div class="progress-fill" id="ct-bar" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 통계 -->
+  <div id="tab-stats" class="tab">
+    <div id="parent-dashboard" style="display:none">
+      <div class="parent-header">
+        <div class="parent-avatar">👧</div>
+        <div class="parent-info">
+          <h3 id="child-name-display">자녀의 기록</h3>
+          <p>실시간 연결됨</p>
+        </div>
+        <div class="live-badge"><div class="dot green"></div>LIVE</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="s-min">0분</div><div class="stat-desc">총 절제 시간</div></div>
+      <div class="stat-box"><div class="stat-num" id="s-won">0원</div><div class="stat-desc">총 적립금</div></div>
+      <div class="stat-box"><div class="stat-num" id="s-trees">0그루</div><div class="stat-desc">완성된 나무</div></div>
+      <div class="stat-box"><div class="stat-num" id="s-streak">0일</div><div class="stat-desc">연속 참여</div></div>
+    </div>
+    <div class="bar-chart" id="week-chart"></div>
+  </div>
+
+  <!-- 미래 -->
+  <div id="tab-future" class="tab">
+    <div class="section-card">
+      <div class="sec-title">projection</div>
+      <div class="sec-head">매일 3시간 절제하면?</div>
+      <div class="proj-row"><div class="proj-icon">📅</div><div><div class="proj-period">1 MONTH</div><div class="proj-value">90시간 절약</div><div class="proj-sub">162,000원 적립</div></div></div>
+      <div class="proj-row"><div class="proj-icon">🌞</div><div><div class="proj-period">1 YEAR</div><div class="proj-value">1,095시간 절약</div><div class="proj-sub">1,971,000원 적립</div></div></div>
+      <div class="proj-row"><div class="proj-icon">📆</div><div><div class="proj-period">1 YEAR = DAYS</div><div class="proj-value">약 45일</div><div class="proj-sub">스마트폰 없이 보낸 순수한 나의 시간</div></div></div>
+      <div class="proj-row"><div class="proj-icon">🏆</div><div><div class="proj-period">10 YEARS</div><div class="proj-value">약 456일</div><div class="proj-sub">19,710,000원 적립 가능</div></div></div>
+      <div class="proj-row" style="border-color:rgba(255,213,79,0.25)"><div class="proj-icon">💰</div><div><div class="proj-period">10년 투자 시 (연 5% 복리)</div><div class="proj-value" style="color:#ffd54f">약 2,700만원</div><div class="proj-sub" style="color:#ffd54f">내 절제가 곧 자산이 된다</div></div></div>
+    </div>
+  </div>
+
+  <!-- 설정 -->
+  <div id="tab-settings" class="tab">
+    <!-- 부모 전용: 요금 설정 -->
+    <div id="parent-rate-section" style="display:none">
+      <div class="rate-edit-card">
+        <div class="rate-edit-title">👨‍👩‍👧 부모 전용</div>
+        <div class="rate-edit-head">시간대별 요금 설정</div>
+
+        <div class="rate-edit-row">
+          <div class="rate-edit-label">🌙 구간 1</div>
+          <div class="rate-edit-fields">
+            <div class="field-wrap"><div class="field-lbl">시작</div><input class="field-input" id="r1-start" type="number" min="0" max="23" value="0"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">종료</div><input class="field-input" id="r1-end" type="number" min="0" max="23" value="7"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">분당</div><input class="field-input" id="r1-rate" type="number" min="0" value="0"><div class="field-unit">원</div></div>
+          </div>
+        </div>
+
+        <div class="rate-edit-row">
+          <div class="rate-edit-label">☀️ 구간 2</div>
+          <div class="rate-edit-fields">
+            <div class="field-wrap"><div class="field-lbl">시작</div><input class="field-input" id="r2-start" type="number" min="0" max="23" value="7"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">종료</div><input class="field-input" id="r2-end" type="number" min="0" max="23" value="18"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">분당</div><input class="field-input" id="r2-rate" type="number" min="0" value="5"><div class="field-unit">원</div></div>
+          </div>
+        </div>
+
+        <div class="rate-edit-row">
+          <div class="rate-edit-label">🌆 구간 3</div>
+          <div class="rate-edit-fields">
+            <div class="field-wrap"><div class="field-lbl">시작</div><input class="field-input" id="r3-start" type="number" min="0" max="23" value="18"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">종료</div><input class="field-input" id="r3-end" type="number" min="0" max="24" value="24"><div class="field-unit">시</div></div>
+            <div class="field-wrap"><div class="field-lbl">분당</div><input class="field-input" id="r3-rate" type="number" min="0" value="20"><div class="field-unit">원</div></div>
+          </div>
+        </div>
+
+        <button class="save-rate-btn" onclick="saveRates()">💾 요금 저장 & 자녀에 즉시 반영</button>
+        <div class="rate-saved-note" id="rate-saved-note"></div>
+      </div>
+    </div>
+
+    <div class="setting-card">
+      <div class="setting-row"><span class="setting-name">모드</span><span class="setting-val" id="mode-display">자녀</span></div>
+      <div class="setting-row"><span class="setting-name">이름</span><span class="setting-val" id="name-display">—</span></div>
+      <div class="setting-row"><span class="setting-name">가족 코드</span><span class="setting-val" id="code-display" style="cursor:pointer" onclick="copyCode()">— (탭해서 복사)</span></div>
+    </div>
+    <div class="setting-card">
+      <div class="setting-row"><span class="setting-name">알림 받기</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="setting-row"><span class="setting-name">나무 완성 알림</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="setting-card">
+      <div class="setting-row"><span class="setting-name" style="color:#ff8a80;cursor:pointer" onclick="logout()">로그아웃 / 초기화</span></div>
+    </div>
+    <div class="info-notice">
+      <p>📱 홈 화면에 추가하면 앱처럼 설치돼요<br><strong>크롬 → 메뉴(⋮) → 홈 화면에 추가</strong><br>Safari → 공유 → 홈 화면에 추가</p>
+    </div>
+  </div>
+</div>
+
+<!-- 종료 모달 -->
+<div class="modal-bg" id="stop-modal">
+  <div class="modal">
+    <h3>세션을 종료할까요?</h3>
+    <p>지금까지 절제한 시간과 적립금이 저장돼요</p>
+    <div class="modal-earned" id="modal-earned">0원</div>
+    <p style="font-size:12px;color:#5a7a9a">이번 세션 적립금</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">계속하기</button>
+      <button class="modal-confirm" onclick="confirmStop()">종료 &amp; 저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="sync-toast" id="sync-toast">☁️ 저장됐어요!</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import{getFirestore,doc,setDoc,getDoc,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const fbConfig={apiKey:"AIzaSyBqp1L-dfCt45OuKVJDGk-n0YB6fz0vxp8",authDomain:"detoxforest.firebaseapp.com",projectId:"detoxforest",storageBucket:"detoxforest.firebasestorage.app",messagingSenderId:"430651543583",appId:"1:430651543583:web:b835f3c48577026644452a"};
+const fbApp=initializeApp(fbConfig);
+const db=getFirestore(fbApp);
+
+const TREE_GOAL=10000;
+
+// 기본 요금 구간
+let rates=[
+  {start:0, end:7,  rate:0,  label:'🌙 자정~오전 7시'},
+  {start:7, end:18, rate:5,  label:'☀️ 오전 7시~오후 6시'},
+  {start:18,end:24, rate:20, label:'🌆 오후 6시~자정'},
+];
+
+let mode='',familyCode='',userName='',state='idle';
+let sessionSec=0,sessionEarned=0,ticker=null,unsub=null,rateUnsub=null;
+let data={totalWon:0,totalSec:0,completedTrees:0,weekData:[0,0,0,0,0,0,0],streak:0};
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+function getCurrentRate(){
+  const h=new Date().getHours();
+  for(const r of rates) if(h>=r.start&&h<r.end) return r.rate;
+  return 0;
+}
+
+function fmt2(n){return String(n).padStart(2,'0');}
+function fmtWon(n){if(n>=10000)return(n/10000).toFixed(1).replace('.0','')+'만원';return n.toLocaleString()+'원';}
+function fmtMin(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60);if(h>0)return h+'시간 '+m+'분';return m+'분';}
+function getEmoji(w){if(w>=TREE_GOAL)return'🌲';if(w>=7500)return'🌳';if(w>=5000)return'🪴';if(w>=2500)return'🌿';return'🌱';}
+function getStage(w){if(w>=TREE_GOAL)return'COMPLETE';if(w>=7500)return'TREE STAGE';if(w>=5000)return'PLANT STAGE';if(w>=2500)return'SPROUT STAGE';return'SEED STAGE';}
+function showToast(msg){const t=document.getElementById('sync-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function renderRateTable(){
+  const h=new Date().getHours();
+  const body=document.getElementById('rate-table-body');
+  if(!body)return;
+  const colors=['rgba(100,120,180,0.5)','rgba(255,210,80,0.5)','rgba(107,207,143,0.5)'];
+  body.innerHTML=rates.map((r,i)=>{
+    const active=h>=r.start&&h<r.end;
+    const rateStr=r.rate===0?'0원 (적립 없음)':`분당 ${r.rate}원`;
+    return `<div class="rate-row${active?' active-slot':''}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="rate-dot" style="background:${colors[i]}"></div>
+        <span class="rate-time">${r.label}</span>
+      </div>
+      <span class="rate-badge${r.rate===0?' zero':''}">${rateStr}</span>
+    </div>`;
+  }).join('');
+  const curRate=getCurrentRate();
+  const rateNow=document.getElementById('rate-now');
+  if(rateNow) rateNow.textContent=curRate===0?'현재 시간대: 적립 없음':`현재 시간대: 분당 ${curRate}원 적립 중`;
+}
+
+function listenRates(){
+  if(rateUnsub)rateUnsub();
+  rateUnsub=onSnapshot(doc(db,'families',familyCode),snap=>{
+    if(snap.exists()&&snap.data().rates){
+      rates=snap.data().rates;
+      renderRateTable();
+      loadRateInputs();
+    }
+  });
+}
+
+function loadRateInputs(){
+  if(rates.length<3)return;
+  document.getElementById('r1-start').value=rates[0].start;
+  document.getElementById('r1-end').value=rates[0].end;
+  document.getElementById('r1-rate').value=rates[0].rate;
+  document.getElementById('r2-start').value=rates[1].start;
+  document.getElementById('r2-end').value=rates[1].end;
+  document.getElementById('r2-rate').value=rates[1].rate;
+  document.getElementById('r3-start').value=rates[2].start;
+  document.getElementById('r3-end').value=rates[2].end;
+  document.getElementById('r3-rate').value=rates[2].rate;
+}
+
+window.saveRates=async function(){
+  const newRates=[
+    {start:+document.getElementById('r1-start').value,end:+document.getElementById('r1-end').value,rate:+document.getElementById('r1-rate').value,label:'🌙 자정~오전 '+document.getElementById('r1-end').value+'시'},
+    {start:+document.getElementById('r2-start').value,end:+document.getElementById('r2-end').value,rate:+document.getElementById('r2-rate').value,label:'☀️ 오전 '+document.getElementById('r2-start').value+'시~오후 '+(+document.getElementById('r2-end').value-12)+'시'},
+    {start:+document.getElementById('r3-start').value,end:+document.getElementById('r3-end').value,rate:+document.getElementById('r3-rate').value,label:'🌆 오후 '+(+document.getElementById('r3-start').value-12)+'시~자정'},
+  ];
+  try{
+    await setDoc(doc(db,'families',familyCode),{rates:newRates,lastRateUpdate:serverTimestamp()},{merge:true});
+    rates=newRates;
+    document.getElementById('rate-saved-note').textContent='✅ 저장 완료! 자녀 앱에 즉시 반영됐어요';
+    renderRateTable();
+    setTimeout(()=>document.getElementById('rate-saved-note').textContent='',3000);
+  }catch(e){document.getElementById('rate-saved-note').textContent='⚠️ 저장 실패: '+e.message;}
+};
+
+async function saveToFirebase(){
+  if(!familyCode)return;
+  try{
+    await setDoc(doc(db,'families',familyCode),{
+      name:userName,totalWon:data.totalWon+sessionEarned,totalSec:data.totalSec+sessionSec,
+      completedTrees:Math.floor((data.totalWon+sessionEarned)/TREE_GOAL),
+      weekData:data.weekData,streak:data.streak||0,lastUpdated:serverTimestamp(),state
+    },{merge:true});
+    showToast('☁️ Firebase에 저장됐어요!');
+  }catch(e){showToast('⚠️ 저장 실패');}
+}
+
+function listenParentStats(){
+  if(unsub)unsub();
+  unsub=onSnapshot(doc(db,'families',familyCode),snap=>{
+    if(snap.exists()){
+      const d=snap.data();
+      data.totalWon=d.totalWon||0;data.totalSec=d.totalSec||0;
+      data.completedTrees=d.completedTrees||0;data.weekData=d.weekData||[0,0,0,0,0,0,0];data.streak=d.streak||0;
+      if(d.rates)rates=d.rates;
+      document.getElementById('child-name-display').textContent=(d.name||'자녀')+'의 기록';
+      renderRateTable();loadRateInputs();updateUI();
+    }
+  });
+}
+
+window.startChildMode=async function(){
+  const nm=document.getElementById('child-name').value.trim();
+  if(!nm){document.getElementById('ob-err').textContent='이름을 입력해주세요';return;}
+  mode='child';userName=nm;familyCode=genCode(nm);
+  localStorage.setItem('df_mode','child');localStorage.setItem('df_name',nm);localStorage.setItem('df_code',familyCode);localStorage.setItem('df_data',JSON.stringify(data));
+  await setDoc(doc(db,'families',familyCode),{name:nm,rates,totalWon:0,totalSec:0,completedTrees:0,weekData:[0,0,0,0,0,0,0],streak:0,lastUpdated:serverTimestamp()});
+  launchApp();
+};
+
+window.startParentMode=async function(){
+  const code=document.getElementById('parent-code-input').value.trim().toUpperCase();
+  if(!code){document.getElementById('ob-err').textContent='코드를 입력해주세요';return;}
+  document.getElementById('ob-err').textContent='연결 중...';
+  try{
+    const snap=await getDoc(doc(db,'families',code));
+    if(!snap.exists()){document.getElementById('ob-err').textContent='❌ 코드를 찾을 수 없어요';return;}
+    mode='parent';familyCode=code;userName=snap.data().name||'자녀';
+    if(snap.data().rates)rates=snap.data().rates;
+    localStorage.setItem('df_mode','parent');localStorage.setItem('df_code',code);
+    launchApp();
+  }catch(e){document.getElementById('ob-err').textContent='연결 오류가 발생했어요';}
+};
+
+function genCode(name){const n=(name||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)||'DET';return n+Math.floor(Math.random()*900+100);}
+
+function launchApp(){
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('mainapp').style.display='block';
+  document.getElementById('header-code-val').textContent=familyCode;
+  document.getElementById('mode-display').textContent=mode==='child'?'자녀':'부모';
+  document.getElementById('name-display').textContent=userName;
+  document.getElementById('code-display').textContent=familyCode+' (탭해서 복사)';
+  if(mode==='parent'){
+    document.getElementById('parent-dashboard').style.display='block';
+    document.getElementById('parent-rate-section').style.display='block';
+    document.querySelectorAll('#main-nav button')[0].style.display='none';
+    document.querySelectorAll('#main-nav button')[1].style.display='none';
+    document.querySelectorAll('#main-nav button')[3].style.display='none';
+    listenParentStats();
+    loadRateInputs();
+    showTab('stats');
+    document.querySelectorAll('#main-nav button').forEach((b,i)=>b.classList.toggle('active',i===2));
+  }else{
+    const saved=localStorage.getItem('df_data');
+    if(saved)try{data=JSON.parse(saved);}catch(e){}
+    listenRates(); // 자녀도 요금 실시간 수신
+    renderCtrl();
+  }
+  renderRateTable();updateUI();
+}
+
+function checkSaved(){
+  const m=localStorage.getItem('df_mode'),c=localStorage.getItem('df_code'),n=localStorage.getItem('df_name');
+  if(m&&c){
+    mode=m;familyCode=c;userName=n||'';
+    const saved=localStorage.getItem('df_data');
+    if(saved)try{data=JSON.parse(saved);}catch(e){}
+    launchApp();
+  }
+}
+
+window.copyCode=function(){
+  navigator.clipboard.writeText(familyCode).then(()=>showToast('📋 코드 복사됐어요: '+familyCode));
+};
+
+window.startSession=function(){state='running';if(!ticker)ticker=setInterval(tick,1000);renderCtrl();updateUI();}
+window.pauseSession=function(){state='paused';clearInterval(ticker);ticker=null;renderCtrl();updateUI();}
+window.resumeSession=function(){state='running';ticker=setInterval(tick,1000);renderCtrl();updateUI();}
+window.stopSession=function(){document.getElementById('modal-earned').textContent=fmtWon(sessionEarned);document.getElementById('stop-modal').classList.add('show');}
+window.closeModal=function(){document.getElementById('stop-modal').classList.remove('show');}
+window.confirmStop=async function(){
+  clearInterval(ticker);ticker=null;
+  data.totalWon+=sessionEarned;data.totalSec+=sessionSec;
+  data.completedTrees=Math.floor(data.totalWon/TREE_GOAL);
+  const day=(new Date().getDay()+6)%7;
+  data.weekData[day]=(data.weekData[day]||0)+sessionEarned;
+  localStorage.setItem('df_data',JSON.stringify(data));
+  sessionSec=0;sessionEarned=0;state='idle';
+  closeModal();renderCtrl();updateUI();
+  await saveToFirebase();
+};
+window.logout=function(){
+  if(!confirm('초기화할까요? 모든 데이터가 삭제돼요.'))return;
+  if(unsub)unsub();if(rateUnsub)rateUnsub();
+  localStorage.clear();location.reload();
+};
+window.shareReport=function(){
+  const total=data.totalWon+sessionEarned;
+  const msg=`🌳 DETOX FOREST 리포트\n\n👤 ${userName}\n💰 총 적립금: ${fmtWon(total)}\n🌲 완성된 나무: ${data.completedTrees}그루\n⏱ 총 절제시간: ${fmtMin(data.totalSec+sessionSec)}\n\n가족 코드: ${familyCode}\n#디톡스포레스트 #스마트폰절제`;
+  if(navigator.share)navigator.share({title:'DETOX FOREST 리포트',text:msg});
+  else navigator.clipboard.writeText(msg).then(()=>showToast('📋 클립보드에 복사됐어요!'));
+};
+
+function tick(){
+  sessionSec++;
+  const rate=getCurrentRate();
+  sessionEarned=Math.floor(sessionSec/60)*rate;
+  updateUI();
+  if(sessionSec%60===0)renderRateTable(); // 매분 시간대 체크
+}
+
+function renderCtrl(){
+  const c=document.getElementById('ctrl-area');
+  if(state==='idle')c.innerHTML=`<button class="btn-main btn-start" onclick="startSession()">▶ 시작하기</button>`;
+  else if(state==='running')c.innerHTML=`<button class="btn-main btn-pause" onclick="pauseSession()">⏸ 잠시 멈춤</button><button class="btn-main btn-stop" onclick="stopSession()">⏹ 종료</button>`;
+  else c.innerHTML=`<button class="btn-main btn-resume" onclick="resumeSession()">▶ 계속하기</button><button class="btn-main btn-stop" onclick="stopSession()">⏹ 종료</button>`;
+}
+
+function updateUI(){
+  const total=data.totalWon+sessionEarned;
+  const inProg=total%TREE_GOAL;
+  const pct=Math.round(inProg/TREE_GOAL*100);
+  document.getElementById('total-amount').innerHTML=fmtWon(total).replace('원','<span>원</span>');
+  document.getElementById('t-h').textContent=fmt2(Math.floor(sessionSec/3600));
+  document.getElementById('t-m').textContent=fmt2(Math.floor(sessionSec%3600/60));
+  document.getElementById('t-s').textContent=fmt2(sessionSec%60);
+  document.getElementById('today-earned').textContent=fmtWon(sessionEarned);
+  document.getElementById('today-time').textContent=fmtMin(sessionSec);
+  const pill=document.getElementById('status-pill'),dot=document.getElementById('dot'),txt=document.getElementById('status-text');
+  pill.className='status-pill';
+  const cr=getCurrentRate();
+  if(state==='running'){pill.classList.add('running');dot.className='dot green';txt.textContent=cr>0?`절제 진행 중 · +${cr}원/분`:'절제 진행 중 (적립 없는 시간대)';}
+  else if(state==='paused'){pill.classList.add('paused');dot.className='dot yellow';txt.textContent='일시 정지됨';}
+  else{pill.classList.add('idle');dot.className='dot gray';txt.textContent='대기 중';}
+  document.getElementById('tree-pct').textContent=pct+'%';
+  document.getElementById('tree-bar').style.width=pct+'%';
+  document.getElementById('next-tree-txt').textContent=inProg.toLocaleString()+' / '+TREE_GOAL.toLocaleString()+'원';
+  document.getElementById('ct-emoji-small').textContent=getEmoji(inProg);
+  const comp=data.completedTrees;
+  document.getElementById('forest-head').textContent=comp>0?`완성된 나무 ${comp}그루 🌲`:'첫 나무를 키워보세요 🌱';
+  const grid=document.getElementById('forest-grid');grid.innerHTML='';
+  for(let i=0;i<Math.max(10,comp+3);i++){
+    const s=document.createElement('div');
+    s.className='tree-slot'+(i<comp?' done':i===comp?' growing':'');
+    s.innerHTML=i<comp?'🌲<span class="slbl">완성</span>':i===comp?getEmoji(inProg)+'<span class="slbl">성장중</span>':'·';
+    grid.appendChild(s);
+  }
+  document.getElementById('ct-emoji').textContent=getEmoji(inProg);
+  document.getElementById('ct-stage').textContent=getStage(inProg);
+  document.getElementById('ct-prog').textContent=inProg.toLocaleString()+' / '+TREE_GOAL.toLocaleString()+'원';
+  document.getElementById('ct-bar').style.width=pct+'%';
+  const totSec=data.totalSec+sessionSec;
+  document.getElementById('s-min').textContent=fmtMin(totSec);
+  document.getElementById('s-won').textContent=fmtWon(total);
+  document.getElementById('s-trees').textContent=comp+'그루';
+  document.getElementById('s-streak').textContent=(data.streak||0)+'일';
+  const days=['월','화','수','목','금','토','일'],maxV=Math.max(...data.weekData,1);
+  document.getElementById('week-chart').innerHTML=data.weekData.map((v,i)=>`<div class="bar-row"><span class="bar-day">${days[i]}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxV*100)}%"></div></div><span class="bar-amt">${v.toLocaleString()}원</span></div>`).join('');
+}
+
+window.showTab=function(t){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  const tabs=['home','forest','stats','future','settings'];
+  const btn=document.querySelectorAll('.nav button')[tabs.indexOf(t)];
+  if(btn)btn.classList.add('active');
+};
+
+checkSaved();
+</script>
+</body>
+</html>
